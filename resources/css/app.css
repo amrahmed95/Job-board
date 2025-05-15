@@ -10,3 +10,21 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+
+/* Breadcrumbs styling */
+.breadcrumb-item {
+    @apply inline-flex items-center;
+}
+
+.breadcrumb-separator {
+    @apply mx-2 text-gray-400;
+}
+
+.breadcrumb-link {
+    @apply text-gray-700 hover:text-blue-600 transition-colors;
+}
+
+.breadcrumb-current {
+    @apply text-gray-500;
+}
