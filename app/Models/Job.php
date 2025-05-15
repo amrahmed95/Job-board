@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Job extends Model
 {
@@ -180,4 +181,107 @@ class Job extends Model
     {
         return $query->where('experience', self::EXPERIENCE_SENIOR);
     }
+
+    /**
+     * Filter jobs by search term (title or description)
+     */
+    public function scopeSearch(Builder $query, ?string $searchTerm): Builder
+    {
+        if (!$searchTerm) {
+            return $query;
+        }
+
+        return $query->where(function($query) use ($searchTerm) {
+            $query->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+        });
+    }
+
+    /**
+     * Filter jobs by salary range
+     */
+    public function scopeSalaryRange(Builder $query, ?int $minSalary, ?int $maxSalary): Builder
+    {
+        $minSalary = $minSalary ?: 0;
+        $maxSalary = $maxSalary ?: PHP_INT_MAX;
+
+        if ($minSalary > $maxSalary) {
+            return $query;
+        }
+
+        return $query->whereBetween('salary', [$minSalary, $maxSalary]);
+    }
+
+    /**
+     * Filter jobs by experience level
+     */
+    public function scopeExperienceLevel(Builder $query, ?string $experience): Builder
+    {
+        if (!$experience) {
+            return $query;
+        }
+
+        return $query->where('experience', $experience);
+    }
+
+    /**
+     * Filter jobs by category
+     */
+    public function scopeCategory(Builder $query, ?int $categoryId): Builder
+    {
+        if (!$categoryId) {
+            return $query;
+        }
+
+        return $query->where('category_id', $categoryId);
+    }
+
+    /**
+     * Filter jobs by location (city and/or country)
+     */
+    public function scopeLocation(Builder $query, ?string $city, ?string $country): Builder
+    {
+        if ($city) {
+            $query->where('city', 'like', "%{$city}%");
+        }
+
+        if ($country) {
+            $query->where('country', 'like', "%{$country}%");
+        }
+
+        return $query;
+    }
+
+    /**
+     * Filter jobs by employment type
+     */
+    public function scopeEmploymentType(Builder $query, ?string $employmentType): Builder
+    {
+        if (!$employmentType) {
+            return $query;
+        }
+
+        return $query->where('employment_type', $employmentType);
+    }
+
+    /**
+     * Apply all filters from request
+     */
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        return $query
+            ->search($filters['title'] ?? null)
+            ->salaryRange(
+                isset($filters['min_salary']) ? (int)$filters['min_salary'] : null,
+                isset($filters['max_salary']) ? (int)$filters['max_salary'] : null
+            )
+            ->experienceLevel($filters['experience'] ?? null)
+            ->category($filters['category'] ?? null)
+            ->location(
+                $filters['city'] ?? null,
+                $filters['country'] ?? null
+            )
+            ->employmentType($filters['employment_type'] ?? null);
+    }
 }
+
