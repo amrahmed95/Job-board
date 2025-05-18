@@ -82,9 +82,14 @@ class Job extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function employer()
+    {
+        return $this->belongsTo(Employer::class);
+    }
+
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->through('employer')->has('user');
     }
 
     // Accessors

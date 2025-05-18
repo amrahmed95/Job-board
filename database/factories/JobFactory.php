@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Job;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Employer;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -34,9 +35,9 @@ class JobFactory extends Factory
             'work_location_type' => $this->faker->randomElement(Job::$work_location_type),
             'city' => $this->faker->randomElement($cities),
             'country' => $this->faker->randomElement($countries),
-            'category_id' => Category::inRandomOrder()->first()->id,
+            'category_id' => Category::factory(),
             'experience' => $this->faker->randomElement(Job::$experience),
-            'user_id' => User::factory(),
+            'employer_id' => Employer::factory(),
         ];
     }
 }

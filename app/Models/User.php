@@ -45,4 +45,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function employer()
+    {
+        return $this->hasOne(Employer::class);
+    }
+
+    public function isEmployer()
+    {
+        return $this->role === 'employer';
+    }
+
+    public function isJobSeeker()
+    {
+        return $this->role === 'job_seeker';
+    }
 }
