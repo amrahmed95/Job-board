@@ -25,7 +25,7 @@
                     </div>
                     <input type="text" name="title" id="title" value="{{ request('title') }}"
                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Search by job title">
+                           placeholder="Search by job title or company name">
                 </div>
             </div>
 

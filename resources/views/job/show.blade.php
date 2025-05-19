@@ -17,6 +17,27 @@
         <x-card class="mb-8">
             <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
                 <div class="flex-1">
+
+                    <!-- Employer Info -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="{{ $job->employer->logo_url }}" alt="{{ $job->employer->name }}"
+                             class="h-12 w-12 rounded-full object-cover border border-gray-200">
+                        <div>
+                            <h2 class="font-medium text-gray-900">{{ $job->employer->name }}</h2>
+                            @if($job->employer->website)
+                                <a href="{{ $job->employer->website }}" target="_blank"
+                                   class="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center">
+                                    <i class="fas fa-globe mr-1"></i>
+                                    {{ parse_url($job->employer->website, PHP_URL_HOST) }}
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- line with html --}}
+                    <div class="border-t border-gray-300 mb-4"></div>
+
+                    <!-- Job Title and Details -->
                     <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ $job->title }}</h1>
 
                     <div class="flex items-center gap-4 text-sm text-gray-600 mb-4">
@@ -129,5 +150,49 @@
                 <i class="far fa-paper-plane mr-2"></i> Apply Now
             </button>
         </x-card>
+
+        <!-- More jobs from this employer -->
+        @if($job->employer->jobs->count() > 1)
+            <div class="mt-12">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">
+                    More jobs from {{ $job->employer->name }}
+                </h2>
+
+                <div class="space-y-4">
+                    @foreach($job->employer->jobs->where('id', '!=', $job->id) as $otherJob)
+                        <a href="{{ route('jobs.show', $otherJob) }}" class="block hover:no-underline">
+                            <x-card class="hover:border-blue-500 transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-lg font-medium text-gray-900">{{ $otherJob->title }}</h3>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-sm text-gray-500">
+                                                {{ $otherJob->employment_type_name }}
+                                            </span>
+                                            <span class="text-sm text-gray-500">•</span>
+                                            <span class="text-sm text-gray-500">
+                                                {{ $otherJob->work_location_type_name }}
+                                            </span>
+                                            <span class="text-sm text-gray-500">•</span>
+                                            <span class="text-sm text-gray-500">
+                                                {{ $otherJob->city }}, {{ $otherJob->country }}
+                                            </span>
+                                            <span class="text-sm text-gray-500">•</span>
+                                            <span class="text-sm text-gray-500">
+                                                {{ $otherJob->salary_currency }} {{ number_format($otherJob->salary) }}
+                                                / {{ $otherJob->salary_period }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ $otherJob->created_at->diffForHumans() }}
+                                    </div>
+                                </div>
+                            </x-card>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 </x-layout>

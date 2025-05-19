@@ -188,7 +188,7 @@ class Job extends Model
     }
 
     /**
-     * Filter jobs by search term (title or description)
+     * Filter jobs by search term (title, description or employer name)
      */
     public function scopeSearch(Builder $query, ?string $searchTerm): Builder
     {
@@ -198,7 +198,10 @@ class Job extends Model
 
         return $query->where(function($query) use ($searchTerm) {
             $query->where('title', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%");
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('employer', function($query) use ($searchTerm) {
+                      $query->where('name', 'like', "%{$searchTerm}%");
+                  });
         });
     }
 
@@ -268,6 +271,7 @@ class Job extends Model
 
         return $query->where('employment_type', $employmentType);
     }
+
 
     /**
      * Apply all filters from request
