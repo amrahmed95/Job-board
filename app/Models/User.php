@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->role === 'job_seeker';
     }
+
+    public function jobApplications()
+    {
+        return $this->hasMany(JobApplication::class);
+    }
 }

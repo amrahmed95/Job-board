@@ -1,5 +1,4 @@
 <x-layout>
-
     <x-breadcrumbs :links="[
         ['label' => 'Jobs', 'url' => route('jobs.index')],
         ['label' => Str::limit($job->title, 30)]
@@ -17,7 +16,6 @@
         <x-card class="mb-8">
             <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
                 <div class="flex-1">
-
                     <!-- Employer Info -->
                     <div class="flex items-center gap-3 mb-4">
                         <img src="{{ $job->employer->logo_url }}" alt="{{ $job->employer->name }}"
@@ -34,7 +32,6 @@
                         </div>
                     </div>
 
-                    {{-- line with html --}}
                     <div class="border-t border-gray-300 mb-4"></div>
 
                     <!-- Job Title and Details -->
@@ -95,10 +92,44 @@
                     </div>
                 </div>
 
-                <div class="md:text-right">
-                    <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <i class="far fa-paper-plane mr-2"></i> Apply Now
-                    </button>
+                <!-- Apply and Save Job Section -->
+                <div class="md:text-right space-y-4">
+                    @auth
+                        @if(auth()->user()->isJobSeeker())
+                            @if($job->hasUserApplied(auth()->user()))
+                                <div class="inline-flex items-center px-4 py-3 rounded-md bg-green-50 border border-green-100">
+                                    <div class="p-2 rounded-full bg-green-100 text-green-600">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h4 class="text-sm font-medium text-green-800">Application Submitted</h4>
+                                        <p class="text-xs text-green-600 mt-1">
+                                            <a href="{{ route('job.application.show', [
+                                                'job' => $job->id,
+                                                'application' => auth()->user()->jobApplications->where('job_id', $job->id)->first()->id
+                                            ]) }}" class="hover:underline">
+                                                View your application
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                            @else
+                                <a href="{{ route('job.application.create', $job) }}"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <i class="far fa-paper-plane mr-2"></i> Apply Now
+                                </a>
+                            @endif
+                        @endif
+                    @else
+                        <div class="space-y-2">
+                            <a href="{{ route('login') }}"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Login to Apply
+                            </a>
+                            <p class="text-xs text-gray-500">Already have an account? Sign in to apply</p>
+                        </div>
+                    @endauth
+
                     <button class="mt-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         <i class="far fa-bookmark mr-2"></i> Save Job
                     </button>
@@ -145,10 +176,35 @@
         <!-- Apply section -->
         <x-card>
             <h3 class="text-lg font-medium text-gray-900 mb-4">How to Apply</h3>
-            <p class="mb-4">Interested in this position? Please submit your application through the button below.</p>
-            <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <i class="far fa-paper-plane mr-2"></i> Apply Now
-            </button>
+            @auth
+                @if(auth()->user()->isJobSeeker() && $job->hasUserApplied(auth()->user()))
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">
+                                    You've already applied to this position on
+                                    {{ auth()->user()->jobApplications->where('job_id', $job->id)->first()->created_at->format('M j, Y') }}.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <p class="mb-4">Interested in this position? Please submit your application through the button below.</p>
+                    <a href="{{ route('job.application.create', $job) }}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i class="far fa-paper-plane mr-2"></i> Apply Now
+                    </a>
+                @endif
+            @else
+                <p class="mb-4">Interested in this position? Please sign in to submit your application.</p>
+                <a href="{{ route('login') }}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Sign In to Apply
+                </a>
+            @endauth
         </x-card>
 
         <!-- More jobs from this employer -->

@@ -12,13 +12,26 @@
     <header class="bg-white shadow-sm">
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-gray-900">Laravel Job Board</h1>
-                <nav class="flex space-x-4">
-                    <a href="#" class="text-gray-700 hover:text-blue-600">Post a Job</a>
+                <a href="{{ route('home') }}" class="text-3xl font-bold text-gray-900 hover:text-blue-600">Laravel Job Board</a>
+                <nav class="flex space-x-4 items-center">
+                    <a href="{{ route('jobs.index') }}" class="text-gray-700 hover:text-blue-600">Browse Jobs</a>
+                    {{-- <a href="{{ route('jobs.create') }}" class="text-gray-700 hover:text-blue-600">Post a Job</a> --}}
+
                     @auth
-                        <a href="#" class="text-gray-700 hover:text-blue-600">Dashboard</a>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-gray-700">Welcome, {{ Auth::user()->name ?? 'Guest' }}</span>
+                            <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-600">Home</a>
+                            <form method="POST" action="{{ route('auth.destroy') }}" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-gray-700 hover:text-blue-600">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
                     @else
-                        <a href="#" class="text-gray-700 hover:text-blue-600">Login</a>
+                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600">Login</a>
+                        {{-- <a href="{{ route('register') }}" class="text-gray-700 hover:text-blue-600">Register</a> --}}
                     @endauth
                 </nav>
             </div>
@@ -26,6 +39,13 @@
     </header>
 
     <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        @auth
+            <!-- Display user information in the main content area if needed -->
+            <div class="mb-4 p-4 bg-blue-50 rounded-lg">
+                <p class="text-blue-800">Logged in as: <strong>{{ Auth::user()->name }}</strong> ({{ Auth::user()->email }})</p>
+            </div>
+        @endauth
+
         {{ $slot }}
     </main>
 

@@ -92,6 +92,18 @@ class Job extends Model
         return $this->through('employer')->has('user');
     }
 
+    public function jobApplications()
+    {
+        return $this->hasMany(JobApplication::class);
+    }
+
+    public function hasUserApplied(User $user)
+    {
+        return $this->jobApplications()
+            ->where('user_id', $user->id)
+            ->exists();
+    }
+
     // Accessors
     public function getFormattedSalaryAttribute()
     {
