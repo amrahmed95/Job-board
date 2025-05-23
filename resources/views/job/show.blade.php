@@ -104,12 +104,20 @@
                                     <div class="ml-3">
                                         <h4 class="text-sm font-medium text-green-800">Application Submitted</h4>
                                         <p class="text-xs text-green-600 mt-1">
-                                            <a href="{{ route('job.application.show', [
-                                                'job' => $job->id,
-                                                'application' => auth()->user()->jobApplications->where('job_id', $job->id)->first()->id
-                                            ]) }}" class="hover:underline">
-                                                View your application
-                                            </a>
+                                            @php
+                                                $application = auth()->user()->jobApplications()
+                                                    ->where('job_id', $job->id)
+                                                    ->first();
+                                            @endphp
+
+                                            @if($application)
+                                                <a href="{{ route('job.application.show', ['job' => $job, 'application' => $application]) }}"
+                                                class="hover:underline">
+                                                    View your application
+                                                </a>
+                                            @else
+                                                <span class="text-red-500">Application not found</span>
+                                            @endif
                                         </p>
                                     </div>
                                 </div>

@@ -51,13 +51,13 @@ class JobApplicationController extends Controller
     public function store(Request $request, Job $job)
     {
         $request->validate([
-            'expected_salary' => 'required|numeric|min:0',
+            'expected_salary' => 'required|numeric|min:1000|max:1000000',
             'cover_letter' => 'nullable|string|min:50|max:2000',
             'resume' => 'required|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
         // Store the resume file
-        $resumePath = $request->file('resume')->store('resumes', 'public');
+        $resumePath = $request->file('resume')->store('resumes', 'private');
 
         // Create the job application
         JobApplication::create([
@@ -77,11 +77,23 @@ class JobApplicationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(JobApplication $application)
+    public function show(Job $job, JobApplication $application)
     {
+        // Verify the application belongs to the job
+        if ($application->job_id !== $job->id) {
+            abort(404);
+        }
+
+        // Eager load the necessary relationships
+        $application->load(['job.employer', 'user']);
+
         // Ensure the user can view this application
         $this->authorize('view', $application);
-        return view('job_applications.show', compact('application'));
+
+        return view('job_applications.show', [
+            'application' => $application,
+            'job' => $job
+        ]);
     }
 
 
@@ -96,8 +108,13 @@ class JobApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function updateStatus(Request $request, JobApplication $application)
+    public function update(Request $request, Job $job, JobApplication $application)
     {
+        // Verify the application belongs to the job
+        if ($application->job_id !== $job->id) {
+            abort(404);
+        }
+
         $this->authorize('update', $application);
 
         $request->validate([

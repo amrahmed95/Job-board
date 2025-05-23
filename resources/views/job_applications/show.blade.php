@@ -2,7 +2,7 @@
     @if(auth()->user()->isJobSeeker())
         <x-breadcrumbs :links="[
             ['label' => 'Home', 'url' => route('home')],
-            ['label' => 'My Applications', 'url' => route('applications.index')],
+            ['label' => 'My Applications', 'url' => route('my-job-applications.index')],
             ['label' => 'Application Details', 'url' => '#'],
         ]" class="mb-4" />
     @else
@@ -34,7 +34,9 @@
             </div>
 
             @if(auth()->user()->id === $application->job->employer_id)
-                <form method="POST" action="{{ route('job.application.update', $application) }}" class="flex items-center gap-4">
+                <form method="POST"
+                    action="{{ route('job.application.update', ['job' => $application->job, 'application' => $application]) }}"
+                    class="flex items-center gap-4">
                     @csrf
                     @method('PATCH')
 
@@ -75,12 +77,13 @@
                 </div>
 
                 <div>
-                    <p class="text-sm text-gray-500">Expected Salary</p>
+                    <p class="text-sm text-gray-500">Submitted - Expected Salary</p>
                     <p class="font-medium">{{ $application->job->salary_currency }} {{ number_format($application->expected_salary) }}</p>
                 </div>
 
+
                 <div>
-                    <a href="{{ Storage::url($application->resume_path) }}"
+                    <a href="{{ route('download.resume', $application) }}"
                        target="_blank"
                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         <i class="fas fa-download mr-2"></i> Download Resume
@@ -114,7 +117,7 @@
                     </div>
                 </div>
             @elseif(auth()->user()->id === $application->job->employer_id)
-                <form method="POST" action="{{ route('job.application.update', $application) }}">
+                <form method="POST" action="{{ route('job.application.update', ['job' => $application->job, 'application' => $application]) }}">
                     @csrf
                     @method('PATCH')
 

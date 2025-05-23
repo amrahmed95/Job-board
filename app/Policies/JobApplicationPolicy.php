@@ -15,9 +15,25 @@ class JobApplicationPolicy
      */
     public function view(User $user, JobApplication $application)
     {
-        // User can view if they're the applicant or the job owner
-        return $user->id === $application->user_id ||
-               $user->id === $application->job->employer_id;
+        // Eager load the job relationship to prevent N+1 queries
+        $application->loadMissing(['job.employer', 'user']);
+
+        // Check if the job exist
+        if (!$application->job) {
+            return false;
+        }
+
+        // Job seeker can view their own application
+        if ($user->isJobSeeker() && $user->id === $application->user_id) {
+            return true;
+        }
+
+        // Employer can view applications to their jobs
+        if ($user->isEmployer() && $user->employer) {
+            return $user->employer->id === $application->job->employer_id;
+        }
+
+        return false;
     }
 
     /**
@@ -25,7 +41,15 @@ class JobApplicationPolicy
      */
     public function update(User $user, JobApplication $application)
     {
+        $application->loadMissing('job.employer');
+
+        if (!$application->job) {
+            return false;
+        }
+
         // Only the employer who owns the job can update status
-        return $user->id === $application->job->employer_id;
+        return $user->isEmployer() &&
+            $user->employer &&
+            $user->employer->id === $application->job->employer_id;
     }
 }
