@@ -6,11 +6,11 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-
     protected $policies = [
-        JobApplication::class => JobApplicationPolicy::class
+        JobApplication::class => JobApplicationPolicy::class,
+        Employer::class => EmployerPolicy::class,
+        Job::class => JobPolicy::class,
     ];
-
 
     /**
      * Register any application services.

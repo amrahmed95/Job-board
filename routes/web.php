@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Employer;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\EmployerController;
@@ -20,15 +21,39 @@ Route::resource("jobs", JobController::class)->only([
 ]);
 
 // Public employer routes
-Route::resource("employers", EmployerController::class)->only([
-    'index',
-    'show'
-]);
+Route::resource('employers', EmployerController::class)
+    ->only(['index', 'show'])
+    ->names([
+        'index' => 'employers.index',
+        'show' => 'employers.show'
+    ]);
+
+// Authenticated employer management routes
+Route::middleware('auth')->group(function() {
+    Route::resource('employers', EmployerController::class)
+        ->only(['edit', 'update', 'destroy'])
+        ->names([
+            'edit' => 'employers.edit',
+            'update' => 'employers.update',
+            'destroy' => 'employers.destroy'
+        ]);
+});
 
 // Authentication routes
 Route::get("login", [AuthController::class, "create"])->name("login");
 Route::post("auth", [AuthController::class, "store"])->name("auth.store");
 Route::delete('logout', [AuthController::class, 'destroy'])->name('logout');
+Route::post('register', [AuthController::class, 'register'])->name('register');
+
+// /employer/register
+Route::prefix('employer')->group(function() {
+    // Employer Registration Routes
+    Route::get('register', [\App\Http\Controllers\Auth\EmployerRegisterController::class, 'create'])
+        ->name('employer.register.create');
+
+    Route::post('register', [\App\Http\Controllers\Auth\EmployerRegisterController::class, 'store'])
+        ->name('employer.register.store');
+});
 
 // Authenticated routes
 Route::middleware('auth')->group(function() {
@@ -68,3 +93,29 @@ Route::middleware('auth')->get('/download-resume/{application}', function(JobApp
 
     return Storage::disk('private')->download($application->resume_path);
 })->name('download.resume');
+
+
+// Employer-specific routes
+Route::prefix('employer')
+    ->middleware(['auth', \App\Http\Middleware\EnsureEmployer::class])
+    ->group(function() {
+        Route::get('dashboard', [\App\Http\Controllers\Employer\DashboardController::class, 'index'])
+            ->name('employer.dashboard');
+
+        Route::resource('jobs', \App\Http\Controllers\Employer\JobController::class)
+            ->only(['create', 'store', 'index', 'edit', 'update', 'destroy'])
+            ->names([
+                'index' => 'employer.jobs.index',
+                'create' => 'employer.jobs.create',
+                'store' => 'employer.jobs.store',
+                'edit' => 'employer.jobs.edit',
+                'update' => 'employer.jobs.update',
+                'destroy' => 'employer.jobs.destroy'
+            ]);
+
+        Route::get('jobs/{job}/edit', [\App\Http\Controllers\Employer\JobController::class, 'edit'])
+            ->name('employer.jobs.edit');
+
+        Route::put('jobs/{job}', [\App\Http\Controllers\Employer\JobController::class, 'update'])
+            ->name('employer.jobs.update');
+    });
