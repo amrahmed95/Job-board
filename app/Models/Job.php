@@ -38,7 +38,8 @@ class Job extends Model
         'country',
         'category_id',
         'experience',
-        'user_id'
+        'user_id',
+        'employer_id',
     ];
 
     protected $casts = [

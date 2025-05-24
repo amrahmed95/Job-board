@@ -53,13 +53,21 @@
                                 </div>
                             </div>
                             <div class="flex space-x-2">
+                                <a href="{{ route('employer.jobs.applications', $job) }}"
+                                   class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
+                                    View Applied Candidates
+                                </a>
                                 <a href="{{ route('jobs.show', $job) }}"
                                    class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
-                                    View Applications
+                                    View Job Details
                                 </a>
                                 <a href="{{ route('employer.jobs.edit', $job) }}"
                                    class="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded hover:bg-gray-200">
                                     Edit
+                                </a>
+                                <a href="{{ route('employer.jobs.destroy', $job) }}"
+                                   class="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded hover:bg-gray-200">
+                                    Delete
                                 </a>
                             </div>
                         </div>

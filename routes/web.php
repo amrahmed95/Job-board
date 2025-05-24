@@ -113,9 +113,24 @@ Route::prefix('employer')
                 'destroy' => 'employer.jobs.destroy'
             ]);
 
-        Route::get('jobs/{job}/edit', [\App\Http\Controllers\Employer\JobController::class, 'edit'])
-            ->name('employer.jobs.edit');
 
         Route::put('jobs/{job}', [\App\Http\Controllers\Employer\JobController::class, 'update'])
             ->name('employer.jobs.update');
+
+        Route::get('jobs/{job}/edit', [\App\Http\Controllers\Employer\JobController::class, 'edit'])
+            ->name('employer.jobs.edit');
+
+        Route::get('jobs/{job}/delete', [\App\Http\Controllers\Employer\JobController::class, 'destroy'])
+            ->name('employer.jobs.destroy');
+
+        Route::get('jobs/{job}/applications', [\App\Http\Controllers\Employer\JobController::class, 'applications'])
+            ->name('employer.jobs.applications');
+
+        Route::get('jobs/{job}/applications/{application}', [\App\Http\Controllers\Employer\JobController::class, 'showApplication'])
+            ->name('employer.jobs.applications.show');
+
+        Route::Patch('jobs/{job}/applications/{application}', [\App\Http\Controllers\Employer\JobController::class, 'updateApplication'])
+            ->name('employer.jobs.applications.update');
+
+
     });

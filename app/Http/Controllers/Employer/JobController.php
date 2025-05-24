@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Job;
 use App\Models\Employer;
+use App\Models\JobApplication;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -50,6 +51,7 @@ class JobController extends Controller
             'experience' => 'required|in:' . implode(',', Job::$experience),
         ]);
 
+        $validated['user_id'] = auth()->user()->id;
         $validated['employer_id'] = auth()->user()->employer->id;
 
         Job::create($validated);
@@ -95,4 +97,66 @@ class JobController extends Controller
         return redirect()->route('employer.dashboard')
             ->with('success', 'Job updated successfully!');
     }
+
+    public function destroy(Job $job)
+    {
+        $this->authorize('delete', $job);
+
+        $job->delete();
+
+        return redirect()->route('employer.dashboard')
+            ->with('success', 'Job deleted successfully!');
+    }
+
+
+    public function applications(Job $job)
+    {
+        $this->authorize('viewApplications', $job);
+
+        return view('employer.jobs.applications', [
+            'job' => $job,
+            'applications' => $job->jobApplications()
+                ->with('user')
+                ->latest()
+                ->paginate(10)
+        ]);
+    }
+
+    public function showApplication(Job $job, JobApplication $application)
+    {
+        $this->authorize('view', $job);
+        $this->authorize('view', $application);
+
+        return view('employer.jobs.application-show', [
+            'job' => $job,
+            'application' => $application->load('user')
+        ]);
+    }
+
+
+    public function updateApplication(Request $request, Job $job, JobApplication $application)
+    {
+        $this->authorize('update', $job);
+        $this->authorize('update', $application);
+
+        $validated = $request->validate([
+            'feedback' => 'nullable|string|max:1000',
+            'status' => 'nullable|in:' . implode(',', array_keys(JobApplication::getStatusOptions()))
+        ]);
+
+        // Update only the fields that were provided in the request
+        if (isset($validated['feedback'])) {
+            $application->feedback = $validated['feedback'];
+        }
+
+        if (isset($validated['status'])) {
+            $application->status = $validated['status'];
+        }
+
+        $application->save();
+
+        return redirect()->route('employer.jobs.applications', $job)
+            ->with('success', 'Application updated successfully!');
+    }
+
 }
